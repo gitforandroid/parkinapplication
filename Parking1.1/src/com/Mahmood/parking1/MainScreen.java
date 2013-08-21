@@ -14,7 +14,7 @@ public class MainScreen extends Activity{
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_screen);
-		searchParking =(Button)findViewById(R.id.button1);
+		searchParking =(Button)findViewById(R.id.getParkingAddress);
 		trackCar = (Button)findViewById(R.id.button2);
 		
 		searchParking.setOnClickListener(new OnClickListener() {

@@ -38,13 +38,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SecondActiv" />
-        <activity android:name=".MainActivity" />
-        <activity android:name=".SearchParking" />
+        <activity android:name="com.Mahmood.parking1.SecondActiv" />
+        <activity android:name="com.Mahmood.parking1.MainActivity" />
+        <activity android:name="com.Mahmood.parking1.SearchParking" />
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyAykgG2y2n3lzofw7oPUONrfP-XIPcTGes" />
+
+        <activity
+            android:name="com.Mahmood.parking1.AddressInput"
+            android:label="@string/title_activity_address_input" >
+        </activity>
     </application>
 
 </manifest>

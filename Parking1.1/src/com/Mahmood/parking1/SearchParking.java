@@ -28,9 +28,18 @@ public class SearchParking extends Activity{
 				Intent displayMapIntent = new Intent(SearchParking.this, MainActivity.class);
 				startActivity(displayMapIntent);
 				
+			}
+		});
+		
+		btAddress.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
 				
-				/*Intent MainActivityIntent = new Intent(SearchParking.this,MainActivity.class);
-				startActivity(MainActivityIntent);*/
+				Intent displayMapIntent = new Intent(SearchParking.this, AddressInput.class);
+				startActivity(displayMapIntent);
+				
 			}
 		});
 	}

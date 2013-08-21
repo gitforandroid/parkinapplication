@@ -4,10 +4,11 @@
     <string name="app_name">Parking1.1</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-
     <string name="search_parking">Search Parking</string>
     <string name="track_car">Track Car</string>
     <string name="current_location">Current Location</string>
     <string name="famous_places">Famous Places</string>
     <string name="address">Address</string>
+    <string name="title_activity_address_input">AddressInput</string>
+
 </resources>
