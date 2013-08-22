@@ -55,7 +55,13 @@ public class MainActivity extends Activity {
 		System.out.println("hello");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		
+/*this intent is one got from AddressInput.java fetching latitude
+ *  and longitude from user entered address.*/
+		Bundle b = getIntent().getExtras();
+		Double latFromAddress = b.getDouble("lat"); //to be used later
+		Double lonFromAddress = b.getDouble("lon"); //to be used later
+		
 		new MyAsyncTask().execute();
 	}
 
