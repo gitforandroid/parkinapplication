@@ -31,6 +31,16 @@ public class SearchParking extends Activity{
 			}
 		});
 		
+		btFamous.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				Intent famousIntent = new Intent(SearchParking.this,FamousPlaces.class);
+				startActivity(famousIntent);
+			}
+		});
+		
 		btAddress.setOnClickListener(new OnClickListener() {
 			
 			@Override

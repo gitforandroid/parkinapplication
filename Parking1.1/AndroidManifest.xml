@@ -3,7 +3,6 @@
     package="com.Mahmood.parking1"
     android:versionCode="1"
     android:versionName="1.0" >
-
     <uses-sdk
         android:minSdkVersion="11"
         android:targetSdkVersion="18" />
@@ -38,18 +37,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.Mahmood.parking1.SecondActiv" />
+        <activity android:name="com.Mahmood.parking1.ParkingDetails" />
         <activity android:name="com.Mahmood.parking1.MainActivity" />
         <activity android:name="com.Mahmood.parking1.SearchParking" />
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyAykgG2y2n3lzofw7oPUONrfP-XIPcTGes" />
-
+            android:value="AIzaSyCB56aYWo30LnvSJn7fiwspv9P-w5lm4kA" />
+	<!-- API key generated from console - not android api key       AIzaSyDwC28IxNDkoRg3u2Q8PzoSXlhimCyK8bo  -->
         <activity
             android:name="com.Mahmood.parking1.AddressInput"
             android:label="@string/title_activity_address_input" >
         </activity>
+        <activity android:name=".LocationFinder"></activity>
+        <activity android:name=".FamousPlaces"></activity>
+        <activity android:name=".SinglePlaceActivity"></activity>
     </application>
 
 </manifest>

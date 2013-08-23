@@ -3,8 +3,11 @@ package com.Mahmood.parking1;
 import java.io.IOException;
 import java.util.List;
 
+import com.google.android.gms.internal.bt;
+
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -16,7 +19,7 @@ import android.widget.EditText;
 
 public class AddressInput extends Activity {
 
-	Button getParking;
+	Button getParking,btCurrentLocation;
 	String concatenatedAddress;
 	EditText streetAddress, cityAddress, stateAddress, zipAddress;
 	
@@ -27,6 +30,17 @@ public class AddressInput extends Activity {
 		
 		
 		getParking = (Button)findViewById(R.id.getparkingaddress);
+		btCurrentLocation =(Button)findViewById(R.id.btCurrentLocation);
+		
+		btCurrentLocation.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+			Intent currentLocationIntent = new Intent(AddressInput.this,LocationFinder.class);
+			startActivity(currentLocationIntent);
+			}
+		});
 		
 		getParking.setOnClickListener(new OnClickListener() {
 			
@@ -59,8 +73,8 @@ public class AddressInput extends Activity {
 				
 				Intent displayMapIntent = new Intent(AddressInput.this, MainActivity.class);
 				Bundle b = new Bundle();
-				b.putDouble("lat",latitude );
-				b.putDouble("lon", longitude);
+				b.putDouble("latitude",latitude );
+				b.putDouble("longitude", longitude);
 				displayMapIntent.putExtras(b);
 				startActivity(displayMapIntent);
 				

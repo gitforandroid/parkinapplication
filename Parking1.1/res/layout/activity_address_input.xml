@@ -20,7 +20,8 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textView1"
         android:layout_alignParentRight="true"
-        android:ems="10" />
+        android:ems="10"
+        android:hint="House #,Street Name" />
 
     <EditText
         android:id="@+id/citytxt"
@@ -87,5 +88,14 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="82dp"
         android:text="Get Parking Location" />
+
+    <Button
+        android:id="@+id/btCurrentLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/ziptxt"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="31dp"
+        android:text="My Current Location" />
 
 </RelativeLayout>

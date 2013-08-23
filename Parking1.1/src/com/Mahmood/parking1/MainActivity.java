@@ -45,10 +45,13 @@ import android.view.Menu;
 
 public class MainActivity extends Activity {
 
-	static String parkingapi = "http://api.sfpark.org/sfpark/rest/availabilityservice?lat=37.792275&long=-122.397089&radius=0.25&uom=mile&response=json&method=availability&jsoncallback=sfpcallback&pricing=yes";
+	static String parkingapi;
 
 	static String streetnum = "";
 	static String intersect = "";
+	String gotLat;
+	String gotLon;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +59,22 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-/*this intent is one got from AddressInput.java fetching latitude
- *  and longitude from user entered address.*/
-		Bundle b = getIntent().getExtras();
+		/*This bundle is received from SinglePlaceActivity*/ 
+	
+		/*Bundle gotBundle = getIntent().getExtras();
+		gotLat = gotBundle.getString("latitude");
+		gotLon = gotBundle.getString("longitude");
+		*/
+		
+		// MAHMOOD'S STUFF.. AMEY IS COMMENTING THIS BUNDLE..
+		
+		/*this intent is one got from AddressInput.java fetching latitude
+		 *  and longitude from user entered address.*/
+		
+		/*Bundle b = getIntent().getExtras();
 		Double latFromAddress = b.getDouble("lat"); //to be used later
 		Double lonFromAddress = b.getDouble("lon"); //to be used later
-		
+*/		
 		new MyAsyncTask().execute();
 	}
 
@@ -89,7 +102,15 @@ public class MainActivity extends Activity {
 
 		@Override
 		protected String doInBackground(String... arg0) {
-
+			
+			System.out.println("Ameys Bundle lat is:"+gotLat+"Lon is:"+gotLon);
+			
+			//parkingapi = "http://api.sfpark.org/sfpark/rest/availabilityservice?lat="+gotLat+"&long="+gotLon+"&radius=2.0&uom=mile&response=json&method=availability&jsoncallback=sfpcallback&pricing=yes";
+			
+			parkingapi = "http://api.sfpark.org/sfpark/rest/availabilityservice?&radius=0.25&uom=mile&response=json&method=availability&jsoncallback=sfpcallback&pricing=yes&lat=37.792275&long=-122.397089";
+			
+			System.out.println("Url is:"+parkingapi);
+			
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			HttpGet httpget = new HttpGet(parkingapi);
 			// httppost.setHeader("Content-type", "application/json");
@@ -297,7 +318,7 @@ public class MainActivity extends Activity {
 					 */
 					// System.out.println(valued);
 					Intent intent = new Intent(MainActivity.this,
-							SecondActiv.class);
+							ParkingDetails.class);
 					Bundle b = new Bundle();
 					b.putString("name", name);
 					b.putString("jsonvalue", valued.toString());

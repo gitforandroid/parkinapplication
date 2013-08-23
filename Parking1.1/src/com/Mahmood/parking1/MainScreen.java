@@ -16,7 +16,7 @@ public class MainScreen extends Activity{
 		setContentView(R.layout.main_screen);
 		searchParking =(Button)findViewById(R.id.getParkingAddress);
 		trackCar = (Button)findViewById(R.id.button2);
-		
+		//comment
 		searchParking.setOnClickListener(new OnClickListener() {
 			
 			@Override

@@ -1,6 +1,9 @@
 package com.Mahmood.parking1;
 
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,7 +12,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-public class SecondActiv extends Activity {
+public class ParkingDetails extends Activity {
 	
 	JSONObject valuedfrommain;
 	String type;
@@ -23,13 +26,17 @@ public class SecondActiv extends Activity {
 	String from;
 	String to;
 	JSONObject bat;
-	
+	ArrayList<HashMap<String, JSONObject>> forMap;
+	TextView tv2;
+	int count =0;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {System.out.println("hello");
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.second);
+		setContentView(R.layout.parking_details);
 		Bundle b = getIntent().getExtras();
 		String name = b.getString("name");
+		forMap = new ArrayList<HashMap<String, JSONObject>>();
+		tv2= (TextView)findViewById(R.id.tv2);
 		try {
 			valuedfrommain = new JSONObject(b.getString("jsonvalue"));
 			rates = valuedfrommain.getJSONObject("RATES");
@@ -41,10 +48,11 @@ public class SecondActiv extends Activity {
 		}
 		
 		try {
+			System.out.println("Enering try blockkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk");
 			type = valuedfrommain.getString("TYPE");
 			occ = valuedfrommain.getString("OCC");
 			oper = valuedfrommain.getString("OPER");
-			
+			forMap.add(null);
 			for(int j=0;j<rs.length();j++)
 			{
 				bat = rs.getJSONObject(j);
@@ -56,8 +64,12 @@ public class SecondActiv extends Activity {
 				to = bat.getString("TO");
 				
 				
-				//System.out.println("Raterrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr is:"+ rate);
-				
+				System.out.println("Raterrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr is:"+ rate);
+				HashMap<String, JSONObject> h = new HashMap<String, JSONObject>();
+				h.put(rate, bat);
+				forMap.add(h);
+				count = j;
+				System.out.println("Count is:"+count);
 			}
 			
 			
@@ -70,7 +82,10 @@ public class SecondActiv extends Activity {
 		System.out.println(valuedfrommain);
 		TextView txt1 = (TextView)findViewById(R.id.textView1);
 		txt1.setText("PARKING NAME:"+name+"\n\nTYPE(ON/OFF):"+type+"\nOPERATIONAL SPOTS:"+oper+"\nOCCUPIED:"+occ+"\n"+ "Rate is:" + rate);
-		
+		while(count!=0)
+		{
+			System.out.println("Rate is:"+rate);
+		}
 
 	}
 }
