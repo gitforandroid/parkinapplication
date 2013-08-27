@@ -4,15 +4,13 @@ package com.Mahmood.parking1;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.google.android.gms.maps.GoogleMap;
+
 //import com.androidhive.googleplacesandmaps.R;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -28,10 +26,8 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 
-public class FamousPlaces extends Activity {
+public class GoogleParking extends Activity {
 
-	
-	
 	// flag for Internet connection status
 	Boolean isInternetPresent = false;
 
@@ -56,6 +52,8 @@ public class FamousPlaces extends Activity {
 	// Places Listview
 	ListView lv;
 	
+	GoogleMap googleMap;
+	
 	// ListItems data
 	ArrayList<HashMap<String, String>> placesListItems = new ArrayList<HashMap<String,String>>();
 	
@@ -64,13 +62,13 @@ public class FamousPlaces extends Activity {
 	
 	String gotLat;
 	String gotLon;
+	//String rankBy;
 	
 	// KEY Strings
 	public static String KEY_REFERENCE = "reference"; // id of the place
 	public static String KEY_NAME = "name"; // name of the place
 	public static String KEY_VICINITY = "vicinity"; // Place area name
-//	public static String rankBy = "rankBy";
-	
+//	public static double rankby = "rankby";
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -82,7 +80,7 @@ public class FamousPlaces extends Activity {
 		isInternetPresent = cd.isConnectingToInternet();
 		if (!isInternetPresent) {
 			// Internet Connection is not present
-			alert.showAlertDialog(FamousPlaces.this, "Internet Connection Error",
+			alert.showAlertDialog(GoogleParking.this, "Internet Connection Error",
 					"Please connect to working Internet connection", false);
 			// stop executing code by return
 			return;
@@ -90,13 +88,13 @@ public class FamousPlaces extends Activity {
 
 		// AMEY -- RECEIVING A BUNDLE FROM LOCATIONFINDER.. FIND THE REASON FOR THIS IN THAT CLASS..
 		
-		/*Bundle gotLocationBundle = getIntent().getExtras();
+		Bundle gotLocationBundle = getIntent().getExtras();
 		gotLat = gotLocationBundle.getString("latitude1");
 		gotLon = gotLocationBundle.getString("longitude1");
-		*/
+		
+		Log.d("Lat in Google Parking is:", gotLat);
 		
 		// creating GPS Class object
-		
 		
 
 		// Getting listview
@@ -134,8 +132,6 @@ public class FamousPlaces extends Activity {
             }
         });
 	}
-	
-	
 
 	/**
 	 * Background Async Task to Load Google places
@@ -148,7 +144,7 @@ public class FamousPlaces extends Activity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			pDialog = new ProgressDialog(FamousPlaces.this);
+			pDialog = new ProgressDialog(GoogleParking.this);
 			pDialog.setMessage(Html.fromHtml("<b>Search</b><br/>Loading Places..."));
 			pDialog.setIndeterminate(false);
 			pDialog.setCancelable(false);
@@ -167,16 +163,16 @@ public class FamousPlaces extends Activity {
 				// If you want all types places make it as null
 				// Check list of types supported by google
 				// 
-				String types = "amusement_park|aquarium|art_gallery|campground|casino|museum"; // Listing places only cafes, restaurants
+				String types = "parking"; // Listing places only cafes, restaurants
 				
 			//	String types = "parking";
 				// Radius in meters - increase this value if you don't find any places
-				double radius = 50000; // 1000 meters 
+				double radius = 4000; // 1000 meters 
 				
 		//		System.out.println("Bundle lat is:"+gotLat+"Bundle lon is:"+gotLon);
 				
-				latitude = 37.7749295 ;
-				longitude = -122.4194155 ;
+				latitude = Double.parseDouble(gotLat) ;
+				longitude = Double.parseDouble(gotLon) ;
 				// get nearest places
 				nearPlaces = googlePlaces.search(latitude,longitude, types);
 				//location=32.7889541,-96.7968337&radius=3000&types=amusement_park|aquarium|art_gallery|campground|casino|museum&sensor=false
@@ -214,6 +210,9 @@ public class FamousPlaces extends Activity {
 							for (Place p : nearPlaces.results) {
 								HashMap<String, String> map = new HashMap<String, String>();
 								
+								//COMMENTING THIS ---------------------------------------------------AMEY 
+								
+								
 								// Place reference won't display in listview - it will be hidden
 								// Place reference is used to get "place full details"
 								map.put(KEY_REFERENCE, p.reference);
@@ -226,7 +225,7 @@ public class FamousPlaces extends Activity {
 								placesListItems.add(map);
 							}
 							// list adapter
-							ListAdapter adapter = new SimpleAdapter(FamousPlaces.this, placesListItems,
+							ListAdapter adapter = new SimpleAdapter(GoogleParking.this, placesListItems,
 					                R.layout.list_item,new String[] { KEY_REFERENCE, KEY_NAME}, new int[] {R.id.reference, R.id.name });
 							
 							// Adding data into listview
@@ -235,37 +234,37 @@ public class FamousPlaces extends Activity {
 					}
 					else if(status.equals("ZERO_RESULTS")){
 						// Zero results found
-						alert.showAlertDialog(FamousPlaces.this, "Near Places",
+						alert.showAlertDialog(GoogleParking.this, "Near Places",
 								"Sorry no places found. Try to change the types of places",
 								false);
 					}
 					else if(status.equals("UNKNOWN_ERROR"))
 					{
-						alert.showAlertDialog(FamousPlaces.this, "Places Error",
+						alert.showAlertDialog(GoogleParking.this, "Places Error",
 								"Sorry unknown error occured.",
 								false);
 					}
 					else if(status.equals("OVER_QUERY_LIMIT"))
 					{
-						alert.showAlertDialog(FamousPlaces.this, "Places Error",
+						alert.showAlertDialog(GoogleParking.this, "Places Error",
 								"Sorry query limit to google places is reached",
 								false);
 					}
 					else if(status.equals("REQUEST_DENIED"))
 					{
-						alert.showAlertDialog(FamousPlaces.this, "Places Error",
+						alert.showAlertDialog(GoogleParking.this, "Places Error",
 								"Sorry error occured. Request is denied",
 								false);
 					}
 					else if(status.equals("INVALID_REQUEST"))
 					{
-						alert.showAlertDialog(FamousPlaces.this, "Places Error",
+						alert.showAlertDialog(GoogleParking.this, "Places Error",
 								"Sorry error occured. Invalid Request",
 								false);
 					}
 					else
 					{
-						alert.showAlertDialog(FamousPlaces.this, "Places Error",
+						alert.showAlertDialog(GoogleParking.this, "Places Error",
 								"Sorry error occured.",
 								false);
 					}
@@ -275,8 +274,6 @@ public class FamousPlaces extends Activity {
 		}
 
 	}
-
-	
 
 	
 	

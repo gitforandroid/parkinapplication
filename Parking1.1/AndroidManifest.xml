@@ -52,6 +52,7 @@
         <activity android:name=".LocationFinder"></activity>
         <activity android:name=".FamousPlaces"></activity>
         <activity android:name=".SinglePlaceActivity"></activity>
+        <activity android:name=".GoogleParking"></activity>
     </application>
 
 </manifest>

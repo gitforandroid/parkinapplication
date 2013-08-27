@@ -3,6 +3,11 @@ package com.Mahmood.parking1;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -11,8 +16,19 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class SinglePlaceActivity extends Activity {
+public class SinglePlaceActivity extends Activity implements LocationListener 
+{
+	//AMEY - ADDING LOCATION TRACKING FEATURE IN THIS CLASS
+	
+		LocationManager locationManager;
+		String currentLatitude;
+		String currentLongitude;
+		Location location;
+		Button navigate;
+		Uri uri;
+	
 	// flag for Internet connection status
 	Boolean isInternetPresent = false;
 
@@ -41,11 +57,26 @@ public class SinglePlaceActivity extends Activity {
 	public static String KEY_REFERENCE = "reference"; // id of the place
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState)
+	{
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.single_place);
 		findParking = (Button)findViewById(R.id.findParking);
+		navigate = (Button) findViewById(R.id.btNavigate);
+		locationManager = (LocationManager)getSystemService(LOCATION_SERVICE) ;
+		Criteria criteria = new Criteria();
+
+		
+		String provider = locationManager.getBestProvider(criteria, true);
+		
+		location = locationManager.getLastKnownLocation(provider);
+		
+		if(location!=null)
+		{
+			onLocationChanged(location);
+		}
+		locationManager.requestLocationUpdates(provider, 2000, 0, this);
 		
 		Intent i = getIntent();
 		
@@ -54,19 +85,21 @@ public class SinglePlaceActivity extends Activity {
 		
 		// Calling a Async Background thread
 		new LoadSinglePlaceDetails().execute(reference);
-	}
+	}// END OF ONCREATE
 	
 	
 	/**
 	 * Background Async Task to Load Google places
 	 * */
-	class LoadSinglePlaceDetails extends AsyncTask<String, String, String> {
+	class LoadSinglePlaceDetails extends AsyncTask<String, String, String>
+	{
 
 		/**
 		 * Before starting background thread Show Progress Dialog
 		 * */
 		@Override
-		protected void onPreExecute() {
+		protected void onPreExecute() 
+		{
 			super.onPreExecute();
 			pDialog = new ProgressDialog(SinglePlaceActivity.this);
 			pDialog.setMessage("Loading profile ...");
@@ -78,7 +111,8 @@ public class SinglePlaceActivity extends Activity {
 		/**
 		 * getting Profile JSON
 		 * */
-		protected String doInBackground(String... args) {
+		protected String doInBackground(String... args) 
+		{
 			String reference = args[0];
 			
 			// creating Places class object
@@ -97,22 +131,28 @@ public class SinglePlaceActivity extends Activity {
 		/**
 		 * After completing background task Dismiss the progress dialog
 		 * **/
-		protected void onPostExecute(String file_url) {
+		protected void onPostExecute(String file_url) 
+		{
 			// dismiss the dialog after getting all products
 			pDialog.dismiss();
 			// updating UI from Background Thread
-			runOnUiThread(new Runnable() {
-				public void run() {
+			runOnUiThread(new Runnable() 
+			{
+				public void run() 
+				{
 					/**
 					 * Updating parsed Places into LISTVIEW
 					 * */
-					if(placeDetails != null){
+					if(placeDetails != null)
+					{
 						String status = placeDetails.status;
 						
 						// check place deatils status
 						// Check for all possible status
-						if(status.equals("OK")){
-							if (placeDetails.result != null) {
+						if(status.equals("OK"))
+						{
+							if (placeDetails.result != null) 
+							{
 								String name = placeDetails.result.name;
 								String address = placeDetails.result.formatted_address;
 								String phone = placeDetails.result.formatted_phone_number;
@@ -142,7 +182,8 @@ public class SinglePlaceActivity extends Activity {
 								lbl_location.setText(Html.fromHtml("<b>Latitude:</b> " + latitude + ", <b>Longitude:</b> " + longitude));
 							}
 						}
-						else if(status.equals("ZERO_RESULTS")){
+						else if(status.equals("ZERO_RESULTS"))
+						{
 							alert.showAlertDialog(SinglePlaceActivity.this, "Near Places",
 									"Sorry no place found.",
 									false);
@@ -177,20 +218,24 @@ public class SinglePlaceActivity extends Activity {
 									"Sorry error occured.",
 									false);
 						}
-					}else{
+					}
+					else
+					{
 						alert.showAlertDialog(SinglePlaceActivity.this, "Places Error",
 								"Sorry error occured.",
 								false);
-					}
+					}// end of placeDetails ! - null
 					
 					
 				}
 			});
 			
-			findParking.setOnClickListener(new OnClickListener() {
+			findParking.setOnClickListener(new OnClickListener() 
+			{
 				
 				@Override
-				public void onClick(View v) {
+				public void onClick(View v)
+				{
 					// TODO Auto-generated method stub
 					Bundle sendBundle = new Bundle();
 					sendBundle.putString("latitude", latitude);
@@ -202,8 +247,44 @@ public class SinglePlaceActivity extends Activity {
 					
 				}
 			});
+			
+			navigate.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View arg0) {
+					// TODO Auto-generated method stub
+				//	Toast.makeText(getApplicationContext(), "latitude"+currentLatitude, Toast.LENGTH_LONG).show();
+				//	uri = Uri.parse("http://maps.google.com/maps?saddr="+currentLatitude+","+currentLongitude+"+"&daddr="+latitude+","+longitude+"+"&z= 18""+"zoomLevel");
+					uri = Uri.parse("http://maps.google.com/maps?saddr="+currentLatitude+","+currentLongitude+"&daddr="+latitude+","+longitude+"&z="+18);
+					Intent navIntent = new Intent(Intent.ACTION_VIEW,uri);
+					startActivity(navIntent);
+					System.out.println("URL is:"+uri);
+				}
+			});
 		}
+		
+		
 
+	}
+	public void onLocationChanged(Location arg0) {
+		// TODO Auto-generated method stub
+		currentLatitude = String.valueOf(location.getLatitude());
+		currentLongitude = String.valueOf(location.getLongitude());
+	}
+
+	public void onProviderDisabled(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onProviderEnabled(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

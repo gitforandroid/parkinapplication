@@ -26,4 +26,10 @@
         android:text="Address"
         android:layout_marginLeft="110dp" />
 
+    <Button
+        android:id="@+id/googleParking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" Google Parking" />
+
 </LinearLayout>

@@ -1,10 +1,6 @@
 package com.Mahmood.parking1;
 
-import android.app.Activity;
-import android.os.Bundle;
-
 import java.io.BufferedReader;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,25 +8,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Activity;
 import android.util.Log;
 import android.view.Menu;
 
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.MapFragment;
@@ -38,12 +37,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import android.os.Bundle;
-import android.app.Activity;
-import android.content.Intent;
-import android.view.Menu;
-
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements LocationListener {
 
 	static String parkingapi;
 
@@ -51,20 +45,39 @@ public class MainActivity extends Activity {
 	static String intersect = "";
 	String gotLat;
 	String gotLon;
+	String num_records;
+	private MyAsyncTask mAsyncTask;
+	Intent googleIntent;
+	private ProgressDialog pd;
+	private Context context;
+	LocationFinder locationFinder;
+	Location location;
+	LocationManager locationManager;
 	
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		System.out.println("hello");
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		locationManager = (LocationManager)getSystemService(LOCATION_SERVICE) ;
+		Criteria criteria = new Criteria();
+
+		
+		String provider = locationManager.getBestProvider(criteria, true);
+		
+		location = locationManager.getLastKnownLocation(provider);
+		
+		if(location!=null)
+		{
+			onLocationChanged(location);
+		}
+		locationManager.requestLocationUpdates(provider, 2000, 0, this);
 		
 		/*This bundle is received from SinglePlaceActivity*/ 
-	
-		/*Bundle gotBundle = getIntent().getExtras();
-		gotLat = gotBundle.getString("latitude");
-		gotLon = gotBundle.getString("longitude");
-		*/
+		/*locationFinder.onLocationChanged(location);
+		Bundle gotBundle = getIntent().getExtras();
+		gotLat = gotBundle.getString("latitude1");
+		gotLon = gotBundle.getString("longitude1");*/
+		
 		
 		// MAHMOOD'S STUFF.. AMEY IS COMMENTING THIS BUNDLE..
 		
@@ -75,7 +88,9 @@ public class MainActivity extends Activity {
 		Double latFromAddress = b.getDouble("lat"); //to be used later
 		Double lonFromAddress = b.getDouble("lon"); //to be used later
 */		
-		new MyAsyncTask().execute();
+		mAsyncTask = (MyAsyncTask) new MyAsyncTask().execute();
+		
+		/*setContentView(R.layout.activity_main);*/
 	}
 
 	@Override
@@ -99,15 +114,33 @@ public class MainActivity extends Activity {
 
 		ArrayList<String> lat = new ArrayList<String>();
 		ArrayList<String> lon = new ArrayList<String>();
+		
+		
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			pd = new ProgressDialog(MainActivity.this);
+			pd.setTitle("Processing...");
+			pd.setMessage("Please wait.");
+			pd.setCancelable(false);
+			pd.setIndeterminate(true);
+			pd.show();
+		}
 
 		@Override
 		protected String doInBackground(String... arg0) {
 			
 			System.out.println("Ameys Bundle lat is:"+gotLat+"Lon is:"+gotLon);
 			
-			//parkingapi = "http://api.sfpark.org/sfpark/rest/availabilityservice?lat="+gotLat+"&long="+gotLon+"&radius=2.0&uom=mile&response=json&method=availability&jsoncallback=sfpcallback&pricing=yes";
+			parkingapi = "http://api.sfpark.org/sfpark/rest/availabilityservice?lat="+gotLat+"&long="+gotLon+"&radius=2.0&uom=mile&response=json&method=availability&jsoncallback=sfpcallback&pricing=yes";
 			
-			parkingapi = "http://api.sfpark.org/sfpark/rest/availabilityservice?&radius=0.25&uom=mile&response=json&method=availability&jsoncallback=sfpcallback&pricing=yes&lat=37.792275&long=-122.397089";
+		//	parkingapi = "http://api.sfpark.org/sfpark/rest/availabilityservice?&radius=0.25&uom=mile&response=json&method=availability&jsoncallback=sfpcallback&pricing=yes&lat=37.792275&long=-122.397089";
+
+			// FOR DALLAS
+			
+			
+		//	parkingapi = "http://api.sfpark.org/sfpark/rest/availabilityservice?&radius=0.25&uom=mile&response=json&method=availability&jsoncallback=sfpcallback&pricing=yes&lat=32.7879407&long=-96.7966204";
 			
 			System.out.println("Url is:"+parkingapi);
 			
@@ -162,7 +195,7 @@ public class MainActivity extends Activity {
 			}
 
 			System.out.println("hello1");
-
+			
 			Log.d("json", result.toString());
 			JSONObject jsonObject;
 			try {
@@ -172,6 +205,20 @@ public class MainActivity extends Activity {
 				Log.d("JSON Tag", result);
 
 				jsonObject = new JSONObject(result);
+				num_records = jsonObject.getString("NUM_RECORDS");
+				
+				System.out.println("the number of records is :" +num_records);
+				
+				if(num_records.equalsIgnoreCase("0"))
+				{
+					
+					mAsyncTask.cancel(true);
+					onPostExecute(result);
+					 
+					
+				}
+				
+					
 				Avl = jsonObject.getJSONArray("AVL");
 				lat.add("");
 				lon.add("");
@@ -265,6 +312,22 @@ public class MainActivity extends Activity {
 		@Override
 		protected void onPostExecute(String result) {
 
+			if(num_records.equalsIgnoreCase("0"))
+			{
+				Bundle locationBundle = new Bundle();
+				locationBundle.putString("latitude1", gotLat);
+				locationBundle.putString("longitude1", gotLon);
+				
+				googleIntent = new Intent(MainActivity.this, GoogleParking.class);
+				googleIntent.putExtras(locationBundle);
+				startActivity(googleIntent);
+				finish();
+			}
+			if (pd!=null) {
+				pd.dismiss();
+				
+			}
+			setContentView(R.layout.activity_main);
 			// TODO Auto-generated method stub
 			for (int i = 1; i < Avl.length() - 1; i++) {
 				// Create a marker for each city in the JSON data.
@@ -329,6 +392,33 @@ public class MainActivity extends Activity {
 			});
 
 		}
+	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+		// TODO Auto-generated method stub
+		gotLat = String.valueOf(location.getLatitude());
+		gotLon = String.valueOf(location.getLongitude());
+		
+		System.out.println("Amey's Lat in MainActivity is:"+gotLat+"Lon is:"+gotLon);
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
