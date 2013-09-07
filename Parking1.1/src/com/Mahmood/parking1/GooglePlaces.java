@@ -63,10 +63,13 @@ public class GooglePlaces {
 			 request.getUrl().put("rankby", "distance");
 			if(types != null)
 				request.getUrl().put("types", types);
-
+			
+			System.out.println("Request issssssssssssssssssssssssss:"+ request);
+			
 			PlacesList list = request.execute().parseAs(PlacesList.class);
 			// Check log cat for places response status
 			Log.d("Places Status", "" + list.status);
+			System.out.println("************************************************************ List is......................"+list);
 			return list;
 
 		} catch (HttpResponseException e) {

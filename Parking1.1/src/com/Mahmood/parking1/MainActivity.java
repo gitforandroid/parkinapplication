@@ -27,8 +27,10 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
@@ -53,44 +55,72 @@ public class MainActivity extends Activity implements LocationListener {
 	LocationFinder locationFinder;
 	Location location;
 	LocationManager locationManager;
-	
+	ConnectionDetector cd;
+	boolean isInternetPresent = false;
+	String result = null;
+	String provider;
+	String latFromAddress;
+	String lonFromAddress;
+	AlertDialogManager alert = new AlertDialogManager();
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		System.out.println("hello");
 		super.onCreate(savedInstanceState);
+		cd = new ConnectionDetector(getApplicationContext());
 		locationManager = (LocationManager)getSystemService(LOCATION_SERVICE) ;
 		Criteria criteria = new Criteria();
 
 		
-		String provider = locationManager.getBestProvider(criteria, true);
+		provider = locationManager.getBestProvider(criteria, true);
 		
-		location = locationManager.getLastKnownLocation(provider);
+	if(provider==null)
+		{
+			Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+			startActivity(settingsIntent);
+			Toast.makeText(getApplicationContext(), "You Need To Turn On Location Services", Toast.LENGTH_LONG).show();
+			
+		}
+		else
+		{
 		
-		if(location!=null)
+			location = locationManager.getLastKnownLocation(provider);
+			
+		}
+	isInternetPresent = cd.isConnectingToInternet();
+	if (isInternetPresent==false && provider!=null )
+    {
+		alert.showAlertDialog(MainActivity.this, "Internet Connection Error",
+				"Please connect to working Internet connection", false);
+		// stop executing code by return
+		 startActivity(new Intent(Settings.ACTION_SETTINGS));
+		/*return;*/
+	}
+
+	Bundle b = getIntent().getExtras();
+	if(b!=null){
+	latFromAddress = b.getString("latitude"); 
+	lonFromAddress = b.getString("longitude");
+	
+	System.out.println("Lat is----------------------------------------"+latFromAddress);}
+	
+	if(latFromAddress!=null&&lonFromAddress!=null)
+	{
+		gotLat = latFromAddress;
+		gotLon =lonFromAddress;
+		
+		System.out.println("From address input----------------------------");
+	}
+		 
+	else	if(location!=null)
 		{
 			onLocationChanged(location);
+			locationManager.requestLocationUpdates(provider, 2000, 0, this);
+			System.out.println("Should be current location.......................................");
 		}
-		locationManager.requestLocationUpdates(provider, 2000, 0, this);
-		
-		/*This bundle is received from SinglePlaceActivity*/ 
-		/*locationFinder.onLocationChanged(location);
-		Bundle gotBundle = getIntent().getExtras();
-		gotLat = gotBundle.getString("latitude1");
-		gotLon = gotBundle.getString("longitude1");*/
-		
-		
-		// MAHMOOD'S STUFF.. AMEY IS COMMENTING THIS BUNDLE..
-		
-		/*this intent is one got from AddressInput.java fetching latitude
-		 *  and longitude from user entered address.*/
-		
-		/*Bundle b = getIntent().getExtras();
-		Double latFromAddress = b.getDouble("lat"); //to be used later
-		Double lonFromAddress = b.getDouble("lon"); //to be used later
-*/		
+				
 		mAsyncTask = (MyAsyncTask) new MyAsyncTask().execute();
 		
-		/*setContentView(R.layout.activity_main);*/
+		
 	}
 
 	@Override
@@ -109,8 +139,7 @@ public class MainActivity extends Activity implements LocationListener {
 
 		ArrayList<HashMap<String, JSONObject>> forMap = new ArrayList<HashMap<String, JSONObject>>();
 
-		// WHY MAKING AN ARRAYLIST FOR LAT LON
-		// VALUES???????????????????????????????????????????????????????????????????
+		
 
 		ArrayList<String> lat = new ArrayList<String>();
 		ArrayList<String> lon = new ArrayList<String>();
@@ -120,18 +149,35 @@ public class MainActivity extends Activity implements LocationListener {
 		protected void onPreExecute() {
 			// TODO Auto-generated method stub
 			super.onPreExecute();
+			/*isInternetPresent = cd.isConnectingToInternet();
+			if (isInternetPresent==true && provider!=null )
+		    {*/
 			pd = new ProgressDialog(MainActivity.this);
 			pd.setTitle("Processing...");
 			pd.setMessage("Please wait.");
 			pd.setCancelable(false);
 			pd.setIndeterminate(true);
 			pd.show();
+		  //  }
+			/*else
+			{
+				// mAsyncTask.cancel(true);
+				 startActivity(new Intent(Settings.ACTION_SETTINGS));
+			        Toast.makeText(getApplicationContext(), "Please Turn ON Your Data Usage or WiFi", Toast.LENGTH_LONG).show();
+			}*/
 		}
 
 		@Override
 		protected String doInBackground(String... arg0) {
 			
 			System.out.println("Ameys Bundle lat is:"+gotLat+"Lon is:"+gotLon);
+			
+			isInternetPresent = cd.isConnectingToInternet();
+			/*if (isInternetPresent==true)
+		    {*/
+		        //we are connected to a network
+		       // connected = true;
+				System.out.println("Internet Connection");
 			
 			parkingapi = "http://api.sfpark.org/sfpark/rest/availabilityservice?lat="+gotLat+"&long="+gotLon+"&radius=2.0&uom=mile&response=json&method=availability&jsoncallback=sfpcallback&pricing=yes";
 			
@@ -148,7 +194,7 @@ public class MainActivity extends Activity implements LocationListener {
 			HttpGet httpget = new HttpGet(parkingapi);
 			// httppost.setHeader("Content-type", "application/json");
 			InputStream inputstream = null;
-			String result = null;
+			/*String result = null;*/
 
 			try {
 				HttpResponse response = httpClient.execute(httpget);
@@ -196,7 +242,13 @@ public class MainActivity extends Activity implements LocationListener {
 
 			System.out.println("hello1");
 			
-			Log.d("json", result.toString());
+			
+			
+			//COMMENTING THIS LOG -------------- AMEY
+			
+			
+			
+			//Log.d("json", result.toString());
 			JSONObject jsonObject;
 			try {
 				result = result.substring(12);
@@ -306,14 +358,36 @@ public class MainActivity extends Activity implements LocationListener {
 				e.getStackTrace();
 			}
 
-			return null;
-		}
+			
+		
+			
+		//}// end of if internet connection present
+		
+		 /*else
+		    {
+			 mAsyncTask.cancel(true);
+		        
+		       onPostExecute(result); 
+		    }
+		*/ return null;
+	}
 
 		@Override
 		protected void onPostExecute(String result) {
-
-			if(num_records.equalsIgnoreCase("0"))
+			
+			if(isInternetPresent== false||provider ==null)
 			{
+				/*System.out.println("No Internet Connection");
+				
+		        startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+		        Toast.makeText(getApplicationContext(), "Please turn on your internet or WiFi", Toast.LENGTH_LONG).show();*/
+				mAsyncTask.cancel(true);
+			}
+			
+			else
+			{
+			if(num_records.equalsIgnoreCase("0"))
+			{ System.out.println("the val of $$$$$$$"+ gotLat + gotLon); 
 				Bundle locationBundle = new Bundle();
 				locationBundle.putString("latitude1", gotLat);
 				locationBundle.putString("longitude1", gotLon);
@@ -359,14 +433,7 @@ public class MainActivity extends Activity implements LocationListener {
 					String name = marker.getSnippet();
 					JSONObject valued = null;
 
-					/*
-					 * for (HashMap<String, JSONObject> map : forMap) for
-					 * (Entry<String, JSONObject> mapEntry : map.entrySet()) {
-					 * String key = mapEntry.getKey(); JSONObject value =
-					 * mapEntry.getValue(); System.out.println(key +""+ value);
-					 * }
-					 */
-					// System.out.println(forMap.get(1).get("Pine St (2-98)"));
+					
 
 					for (int i = 1; i < forMap.size(); i++) {
 						if ((forMap.get(i).get(name) != null)) {
@@ -374,12 +441,7 @@ public class MainActivity extends Activity implements LocationListener {
 							valued = forMap.get(i).get(name);
 						}
 					}
-					/*
-					 * for(Map<String, JSONObject> map : forMap) {
-					 * if(map.containsKey("Pine St (2-98)"))
-					 * System.out.println("works*********"); }
-					 */
-					// System.out.println(valued);
+					
 					Intent intent = new Intent(MainActivity.this,
 							ParkingDetails.class);
 					Bundle b = new Bundle();
@@ -392,6 +454,7 @@ public class MainActivity extends Activity implements LocationListener {
 			});
 
 		}
+		}// end of else for internet connectivity present..
 	}
 
 	@Override

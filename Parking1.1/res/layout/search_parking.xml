@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
@@ -7,29 +7,60 @@
     <Button
         android:id="@+id/btCurrentLocation"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Current Location"
-        android:layout_marginTop="100dp"
-        android:layout_marginLeft="80dp" />
+        android:layout_height="115dp"
+        
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/currentlocationsmall" />
 
     <Button
         android:id="@+id/btFamous"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="80dp"
-        android:text="Famous Places" />
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_below="@+id/tvCurrent"
+        android:background="@drawable/famousplaces" />
+    
+    <TextView
+        android:id="@+id/tvFamous"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/btFamous"
+        android:text="Find Parking For Famous Locations"
+        android:textStyle="bold"
+        android:layout_marginLeft="70dp"/>
+    
 
     <Button
         android:id="@+id/btAddress"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Address"
-        android:layout_marginLeft="110dp" />
-
-    <Button
-        android:id="@+id/googleParking"
+        android:layout_height="115dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_below="@+id/tvFamous"
+        android:background="@drawable/addressinput" />
+    
+     <TextView
+        android:id="@+id/tvAddressInput"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=" Google Parking" />
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/btAddress"
+        android:text="Enter Address To Find Parking"
+        android:layout_marginLeft="70dp"
+        android:textStyle="bold"/>
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/tvCurrent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/btCurrentLocation"
+        android:text="Parking For Current Location"
+        android:layout_marginLeft="70dp"
+        android:textStyle="bold"/>
+
+</RelativeLayout>

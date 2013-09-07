@@ -53,6 +53,7 @@
         <activity android:name=".FamousPlaces"></activity>
         <activity android:name=".SinglePlaceActivity"></activity>
         <activity android:name=".GoogleParking"></activity>
+        <activity android:name=".LocalAttractions"></activity>
     </application>
 
 </manifest>

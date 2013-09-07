@@ -8,7 +8,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 //hehaaaaaaaa
 public class SearchParking extends Activity{
-	Button btCurrentLocation, btFamous, btAddress,googleParking;
+	Button btCurrentLocation, btFamous, btAddress;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -18,7 +18,7 @@ public class SearchParking extends Activity{
 		btCurrentLocation = (Button)findViewById(R.id.btCurrentLocation);
 		btFamous = (Button)findViewById(R.id.btFamous);
 		btAddress = (Button)findViewById(R.id.btAddress);
-		googleParking = (Button)findViewById(R.id.googleParking);
+	
 		
 		btCurrentLocation.setOnClickListener(new OnClickListener() {
 			
@@ -37,7 +37,7 @@ public class SearchParking extends Activity{
 			@Override
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
-				Intent famousIntent = new Intent(SearchParking.this,FamousPlaces.class);
+				Intent famousIntent = new Intent(SearchParking.this,LocalAttractions.class);
 				startActivity(famousIntent);
 			}
 		});
@@ -54,17 +54,7 @@ public class SearchParking extends Activity{
 			}
 		});
 		
-		googleParking.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			
-			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-				Intent displayParking = new Intent(SearchParking.this, GoogleParking.class);
-				startActivity(displayParking);
-				
-			}
-		});
+		
 	}
 
 }

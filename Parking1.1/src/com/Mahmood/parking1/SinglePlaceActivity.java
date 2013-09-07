@@ -22,6 +22,7 @@ public class SinglePlaceActivity extends Activity implements LocationListener
 {
 	//AMEY - ADDING LOCATION TRACKING FEATURE IN THIS CLASS
 	
+	
 		LocationManager locationManager;
 		String currentLatitude;
 		String currentLongitude;
@@ -54,7 +55,7 @@ public class SinglePlaceActivity extends Activity implements LocationListener
 	String longitude;
 	
 	// KEY Strings
-	public static String KEY_REFERENCE = "reference"; // id of the place
+	//public static String KEY_REFERENCE = "reference"; // id of the place
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -78,10 +79,14 @@ public class SinglePlaceActivity extends Activity implements LocationListener
 		}
 		locationManager.requestLocationUpdates(provider, 2000, 0, this);
 		
-		Intent i = getIntent();
+
 		
-		// Place referece id
-		String reference = i.getStringExtra(KEY_REFERENCE);
+		// Calling a Async Background thread
+		Bundle b = getIntent().getExtras();
+		String reference = b.getString("key");
+		//Intent i = getIntent();
+		
+		//String reference = i.getStringExtra("key");
 		
 		// Calling a Async Background thread
 		new LoadSinglePlaceDetails().execute(reference);
@@ -146,13 +151,14 @@ public class SinglePlaceActivity extends Activity implements LocationListener
 					if(placeDetails != null)
 					{
 						String status = placeDetails.status;
-						
+						System.out.println("******************"+placeDetails.result);
 						// check place deatils status
 						// Check for all possible status
 						if(status.equals("OK"))
 						{
 							if (placeDetails.result != null) 
 							{
+								
 								String name = placeDetails.result.name;
 								String address = placeDetails.result.formatted_address;
 								String phone = placeDetails.result.formatted_phone_number;

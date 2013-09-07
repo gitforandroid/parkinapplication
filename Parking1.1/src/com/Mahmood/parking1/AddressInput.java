@@ -22,6 +22,7 @@ public class AddressInput extends Activity {
 	Button getParking,btCurrentLocation;
 	String concatenatedAddress;
 	EditText streetAddress, cityAddress, stateAddress, zipAddress;
+	AlertDialogManager alert = new AlertDialogManager();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,22 +63,38 @@ public class AddressInput extends Activity {
 				Geocoder geoCoder = new Geocoder(AddressInput.this);
 				try {
 					foundGeocode = geoCoder.getFromLocationName(concatenatedAddress, 1);
+					
+					System.out.println("Gecode is***********************************"+foundGeocode);
+					
+					if(foundGeocode.size()==0)
+					{
+						alert.showAlertDialog(AddressInput.this, "Wrong Address",
+								"Please Enter The Correct Address",
+								false);
+					}
+					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} 
-				 double latitude = foundGeocode.get(0).getLatitude(); //getting latitude
-				 double longitude = foundGeocode.get(0).getLongitude();//getting longitude
+				
+				
+				if(foundGeocode.size()!=0)
+				{
+				 String latitude = String.valueOf(foundGeocode.get(0).getLatitude()); //getting latitude
+				 String longitude = String.valueOf(foundGeocode.get(0).getLongitude());//getting longitude
 				System.out.println("this is epic"+latitude+","+longitude);
 				
 				
-				Intent displayMapIntent = new Intent(AddressInput.this, MainActivity.class);
+				
+				
 				Bundle b = new Bundle();
-				b.putDouble("latitude",latitude );
-				b.putDouble("longitude", longitude);
+				b.putString("latitude",latitude );
+				b.putString("longitude", longitude);
+				Intent displayMapIntent = new Intent(AddressInput.this, MainActivity.class);
 				displayMapIntent.putExtras(b);
 				startActivity(displayMapIntent);
-				
+				}
 				
 			}
 		});

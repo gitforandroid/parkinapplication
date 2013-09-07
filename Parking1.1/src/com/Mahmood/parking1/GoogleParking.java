@@ -4,9 +4,7 @@ package com.Mahmood.parking1;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.google.android.gms.maps.GoogleMap;
-
-//import com.androidhive.googleplacesandmaps.R;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -15,15 +13,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
-import android.view.Menu;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+//import com.androidhive.googleplacesandmaps.R;
 
 
 public class GoogleParking extends Activity {
@@ -45,6 +44,7 @@ public class GoogleParking extends Activity {
 
 	// GPS Location
 	
+	PlaceDetails placeDetails;
 
 	// Progress dialog
 	ProgressDialog pDialog;
@@ -62,7 +62,16 @@ public class GoogleParking extends Activity {
 	
 	String gotLat;
 	String gotLon;
+	
+	String valued;
+	
+	LatLng CURRENT;
 	//String rankBy;
+	
+	
+	//String latFromSinglePlace;
+	
+	
 	
 	// KEY Strings
 	public static String KEY_REFERENCE = "reference"; // id of the place
@@ -72,9 +81,12 @@ public class GoogleParking extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.famous_activity);
+		setContentView(R.layout.google_parking);
 
 		cd = new ConnectionDetector(getApplicationContext());
+		
+		
+		 
 
 		// Check if Internet present
 		isInternetPresent = cd.isConnectingToInternet();
@@ -86,7 +98,8 @@ public class GoogleParking extends Activity {
 			return;
 		}
 
-		// AMEY -- RECEIVING A BUNDLE FROM LOCATIONFINDER.. FIND THE REASON FOR THIS IN THAT CLASS..
+		// AMEY -- RECEIVING A BUNDLE FROM LOCATIONFINDER.. FIND THE REASON FOR THIS IN THAT CLASS.. i think here we need to get bundle from main activity as well..nahi nlahiem..me i  have used same 
+		// name for keys.. and current and location finder will always have current location anyway.. so it does not matter..
 		
 		Bundle gotLocationBundle = getIntent().getExtras();
 		gotLat = gotLocationBundle.getString("latitude1");
@@ -98,7 +111,7 @@ public class GoogleParking extends Activity {
 		
 
 		// Getting listview
-		lv = (ListView) findViewById(R.id.list);
+		//lv = (ListView) findViewById(R.id.mapFamous);
 		
 		// button show on map
 		
@@ -114,7 +127,7 @@ public class GoogleParking extends Activity {
 		 * ListItem click event
 		 * On selecting a listitem SinglePlaceActivity is launched
 		 * */
-		lv.setOnItemClickListener(new OnItemClickListener() {
+		/*lv.setOnItemClickListener(new OnItemClickListener() {
  
             public void onItemClick(AdapterView<?> parent, View view,
                     int position, long id) {
@@ -131,7 +144,7 @@ public class GoogleParking extends Activity {
                 startActivity(in);
             }
         });
-	}
+*/	}
 
 	/**
 	 * Background Async Task to Load Google places
@@ -141,6 +154,13 @@ public class GoogleParking extends Activity {
 		/**
 		 * Before starting background thread Show Progress Dialog
 		 * */
+		
+		
+		ArrayList<Double> parkingLat = new ArrayList<Double>();
+		ArrayList<Double> parkingLon = new ArrayList<Double>();
+		ArrayList<String> parkingName = new ArrayList<String>();
+		
+		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -173,6 +193,8 @@ public class GoogleParking extends Activity {
 				
 				latitude = Double.parseDouble(gotLat) ;
 				longitude = Double.parseDouble(gotLon) ;
+				
+				
 				// get nearest places
 				nearPlaces = googlePlaces.search(latitude,longitude, types);
 				//location=32.7889541,-96.7968337&radius=3000&types=amusement_park|aquarium|art_gallery|campground|casino|museum&sensor=false
@@ -193,6 +215,7 @@ public class GoogleParking extends Activity {
 		protected void onPostExecute(String file_url) {
 			// dismiss the dialog after getting all products
 			pDialog.dismiss();
+			final String latcurrent;
 			// updating UI from Background Thread
 			runOnUiThread(new Runnable() {
 				public void run() {
@@ -201,35 +224,111 @@ public class GoogleParking extends Activity {
 					 * */
 					// Get json response status
 					String status = nearPlaces.status;
-					
+			//	System.out.println("******************"+nearPlaces.results);
 					// Check for all possible status
 					if(status.equals("OK")){
 						// Successfully got places details
 						if (nearPlaces.results != null) {
 							// loop through each place
-							for (Place p : nearPlaces.results) {
+							for (  Place p : nearPlaces.results) {
 								HashMap<String, String> map = new HashMap<String, String>();
 								
 								//COMMENTING THIS ---------------------------------------------------AMEY 
-								
-								
+								System.out.println("------shitty--------"+p.geometry.location.lat);
+								parkingLat.add(p.geometry.location.lat);
+								parkingLon.add(p.geometry.location.lng);
+								parkingName.add(p.name);
 								// Place reference won't display in listview - it will be hidden
 								// Place reference is used to get "place full details"
-								map.put(KEY_REFERENCE, p.reference);
-								
-								// Place name
-								map.put(KEY_NAME, p.name);
+								map.put(p.name, p.reference);
+							
+								/*// Place name
+								map.put(KEY_NAME, p.name);*/
 								
 								
 								// adding HashMap to ArrayList
 								placesListItems.add(map);
+								
+								
 							}
+							for (Double s : parkingLat) {
+
+								System.out.println(s);
+							}
+							for (Double s : parkingLon) {
+
+								System.out.println(s);
+							}
+							
+							
+							if (googleMap == null) {
+								googleMap = ((MapFragment) getFragmentManager().findFragmentById(
+										R.id.mapFamous)).getMap();
+							}
+							
+							CURRENT = new LatLng(latitude,longitude);
+							googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CURRENT, 18));
+							// Zoom in, animating the camera.
+							googleMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+							
+							googleMap.setMyLocationEnabled(true);
+							
+							for(int i=0;i<parkingLat.size();i++)
+							{
+								googleMap.addMarker(new MarkerOptions()
+								.title("parking")
+								.snippet(parkingName.get(i))
+								.position(
+										new LatLng(parkingLat.get(i), parkingLon.get(i))));
+							}
+							
+							
+							googleMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+								@Override
+								public void onInfoWindowClick(Marker marker) {
+									// TODO Auto-generated method stub
+									String name = marker.getSnippet();
+									
+
+									
+									for (int i = 0; i < placesListItems.size(); i++) {
+										if ((placesListItems.get(i).get(name) != null)) {
+											System.out.println("Place Itemi s****************************"+placesListItems.get(i).get(name));
+											valued = placesListItems.get(i).get(name);
+										}
+									}
+									/*
+									 * for(Map<String, JSONObject> map : forMap) {
+									 * if(map.containsKey("Pine St (2-98)"))
+									 * System.out.println("works*********"); }
+									 */
+									// System.out.println(valued);
+									Intent intent = new Intent(GoogleParking.this,SinglePlaceActivity.class);
+									Bundle b = new Bundle();
+									b.putString("key", valued);
+									intent.putExtras(b);
+									startActivity(intent);
+									// finish();
+								}
+							});
+							//System.out.println("****************************** P NAME IS-------------------------"+p.name);
+							
+							// ENd of FOR LOOP
+							
+							
+							
+							//SinglePlaceActivity singlePlaceActivity = new SinglePlaceActivity();
+							//latFromSinglePlace=singlePlaceActivity.latitude;
+							
+							
+					//		System.out.println("latFromSinglePlace------------------------"+latFromSinglePlace);
+							
 							// list adapter
-							ListAdapter adapter = new SimpleAdapter(GoogleParking.this, placesListItems,
+						/*	ListAdapter adapter = new SimpleAdapter(GoogleParking.this, placesListItems,
 					                R.layout.list_item,new String[] { KEY_REFERENCE, KEY_NAME}, new int[] {R.id.reference, R.id.name });
 							
 							// Adding data into listview
-							lv.setAdapter(adapter);
+							lv.setAdapter(adapter);*/
 						}
 					}
 					else if(status.equals("ZERO_RESULTS")){

@@ -4,10 +4,11 @@ package com.Mahmood.parking1;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-//import com.androidhive.googleplacesandmaps.R;
-
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
@@ -15,20 +16,20 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Html;
-import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
+//import com.androidhive.googleplacesandmaps.R;
 
 
-public class FamousPlaces extends Activity {
+public class FamousPlaces extends Activity implements LocationListener{
 
 	
 	
@@ -40,6 +41,8 @@ public class FamousPlaces extends Activity {
 	
 	// Alert Dialog Manager
 	AlertDialogManager alert = new AlertDialogManager();
+	
+	
 
 	// Google Places
 	GooglePlaces googlePlaces;
@@ -65,11 +68,21 @@ public class FamousPlaces extends Activity {
 	String gotLat;
 	String gotLon;
 	
+	String gotId;
+	
+	String types;
+	
+	Context context;
+	
 	// KEY Strings
 	public static String KEY_REFERENCE = "reference"; // id of the place
 	public static String KEY_NAME = "name"; // name of the place
 	public static String KEY_VICINITY = "vicinity"; // Place area name
-//	public static String rankBy = "rankBy";
+
+	LocationManager locationManager;
+	Location location;
+	
+	String provider;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -77,7 +90,11 @@ public class FamousPlaces extends Activity {
 		setContentView(R.layout.famous_activity);
 
 		cd = new ConnectionDetector(getApplicationContext());
-
+		context=this;
+		/*context=this;
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+				context);
+*/
 		// Check if Internet present
 		isInternetPresent = cd.isConnectingToInternet();
 		if (!isInternetPresent) {
@@ -88,17 +105,41 @@ public class FamousPlaces extends Activity {
 			return;
 		}
 
-		// AMEY -- RECEIVING A BUNDLE FROM LOCATIONFINDER.. FIND THE REASON FOR THIS IN THAT CLASS..
+		// AMEY -- RECEIVING A BUNDLE FROM LocalAttractions.. FIND THE REASON FOR THIS IN THAT CLASS..
 		
-		/*Bundle gotLocationBundle = getIntent().getExtras();
-		gotLat = gotLocationBundle.getString("latitude1");
-		gotLon = gotLocationBundle.getString("longitude1");
-		*/
+		Bundle gotIdBundle = getIntent().getExtras();
+		gotId = gotIdBundle.getString("buttonId");
+		//System.out.println("heyhaaaheyhaa-------"+gotId);
+		
+		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+		
+		Criteria criteria = new Criteria();
+		
+	    provider = locationManager.getBestProvider(criteria, true);
+		
+	    if(provider==null)
+		{
+			Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+			startActivity(settingsIntent);
+			Toast.makeText(getApplicationContext(), "You Need To Turn On Location Services", Toast.LENGTH_LONG).show();
+			
+		}
+		else
+		{
+		
+			location = locationManager.getLastKnownLocation(provider);
+			
+		}
+		if(location!=null)
+		{
+			onLocationChanged(location);
+			locationManager.requestLocationUpdates(provider, 2000, 0, this);
+		}
 		
 		// creating GPS Class object
 		
 		
-
+//******************************************* COMMENTING THIS****************************************//
 		// Getting listview
 		lv = (ListView) findViewById(R.id.list);
 		
@@ -126,10 +167,10 @@ public class FamousPlaces extends Activity {
                 // Starting new intent
                 Intent in = new Intent(getApplicationContext(),
                         SinglePlaceActivity.class);
-                
+                System.out.println("Reference in Famous is --------------------"+reference);
                 // Sending place refrence id to single place activity
                 // place refrence id used to get "Place full details"
-                in.putExtra(KEY_REFERENCE, reference);
+                in.putExtra("key", reference);
                 startActivity(in);
             }
         });
@@ -167,20 +208,73 @@ public class FamousPlaces extends Activity {
 				// If you want all types places make it as null
 				// Check list of types supported by google
 				// 
-				String types = "amusement_park|aquarium|art_gallery|campground|casino|museum"; // Listing places only cafes, restaurants
+				
+				System.out.println("Button id issssssssssssssssssssssssssssssss:"+gotId);
+				
+				if(gotId.equalsIgnoreCase("btAmusement_park"))
+				{
+					System.out.println("I AM CONSIDERING ONLY AMUSEMENT PARKS");
+					types = "amusement_park";
+				
+					// get nearest places
+					nearPlaces = googlePlaces.search(latitude,longitude, types);
+
+				}
+				else if(gotId.equalsIgnoreCase("btCasino"))
+				{
+					types = "casino";
+					
+					nearPlaces = googlePlaces.search(latitude,longitude, types);
+
+				}
+				else if(gotId.equalsIgnoreCase("btMuseum"))
+				{
+					types = "museum";
+					
+					nearPlaces = googlePlaces.search(latitude,longitude, types);
+
+				}
+				else if(gotId.equalsIgnoreCase("btCampground"))
+				{
+					types = "campground";
+					
+					nearPlaces = googlePlaces.search(latitude,longitude, types);
+
+				}
+				else if(gotId.equalsIgnoreCase("btArt_gallery"))
+				{
+					types = "art_gallery";
+				
+					nearPlaces = googlePlaces.search(latitude,longitude, types);
+
+				}
+				else if(gotId.equalsIgnoreCase("btAquarium"))
+				{
+					types = "aquarium";
+					nearPlaces = googlePlaces.search(latitude,longitude, types);
+
+				}
+				
+		
+				
+/******************************************** modified everything before this ****************************************************************************************/
+			//IN CASE OF ERRORS, IGNORE THE STATEMENTS WITH SLASHES.. I HAVE NOT USED THEM ANYWAY.. JUST CONCENTRATE ON COMMENTED STATEMENTS..	
+				//		String types = "amusement_park|aquarium|art_gallery|campground|casino|museum"; // Listing places only cafes, restaurants
 				
 			//	String types = "parking";
 				// Radius in meters - increase this value if you don't find any places
-				double radius = 50000; // 1000 meters 
-				
+/*				double radius = 50000; // 1000 meters 
+*/				
 		//		System.out.println("Bundle lat is:"+gotLat+"Bundle lon is:"+gotLon);
 				
-				latitude = 37.7749295 ;
+/*				latitude = 37.7749295 ;
 				longitude = -122.4194155 ;
 				// get nearest places
 				nearPlaces = googlePlaces.search(latitude,longitude, types);
-				//location=32.7889541,-96.7968337&radius=3000&types=amusement_park|aquarium|art_gallery|campground|casino|museum&sensor=false
+*/				//location=32.7889541,-96.7968337&radius=3000&types=amusement_park|aquarium|art_gallery|campground|casino|museum&sensor=false
 
+				
+/**************************************************************************************************************************************************************************/
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -235,9 +329,29 @@ public class FamousPlaces extends Activity {
 					}
 					else if(status.equals("ZERO_RESULTS")){
 						// Zero results found
-						alert.showAlertDialog(FamousPlaces.this, "Near Places",
-								"Sorry no places found. Try to change the types of places",
+						/*alert.showAlertDialog(FamousPlaces.this, "Near Places",
+								"Sorry no such place found in your vicinity",
 								false);
+						
+						FamousPlaces.this.finish();*/
+						
+						AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+								context);
+
+						alertDialogBuilder.setMessage("Sorry no such place found in your vicinity").setCancelable(false).setPositiveButton("OK",new DialogInterface.OnClickListener() 
+						{
+							public void onClick(DialogInterface dialog,int id) 
+							{
+								// if this button is clicked, close
+								// current activity
+								FamousPlaces.this.finish();
+							}
+						  });
+						AlertDialog alertDialog = alertDialogBuilder.create();
+						 
+						// show it
+						alertDialog.show();
+						
 					}
 					else if(status.equals("UNKNOWN_ERROR"))
 					{
@@ -274,6 +388,40 @@ public class FamousPlaces extends Activity {
 
 		}
 
+	}
+
+
+
+	@Override
+	public void onLocationChanged(Location arg0) {
+		// TODO Auto-generated method stub
+		latitude = location.getLatitude();
+		longitude = location.getLongitude();
+		
+	}
+
+
+
+	@Override
+	public void onProviderDisabled(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void onProviderEnabled(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	
